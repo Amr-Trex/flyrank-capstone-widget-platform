@@ -1,0 +1,17 @@
+# secrets
+.env
+
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# database
+*.sqlite3
+*.db
+
+# misc
+node_modules/
+.DS_Store
+Lead-Capture-Platform-Live-Capstone.pdf
