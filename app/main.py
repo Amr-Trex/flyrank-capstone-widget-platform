@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from app.routers import delivery, embed, public, widgets
+from app.routers import dashboard, delivery, embed, public, widgets
 
 settings = get_settings()
 
@@ -20,6 +20,7 @@ app.include_router(widgets.router)
 app.include_router(public.router)
 app.include_router(delivery.router)
 app.include_router(embed.router)
+app.include_router(dashboard.router)
 
 
 @app.get("/health")

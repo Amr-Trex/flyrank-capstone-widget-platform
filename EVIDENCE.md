@@ -13,12 +13,12 @@ This file contains proof for each requirement.
 - [x] Cross-origin submissions work
 - [x] Invalid payloads rejected with 4xx
 - [x] Valid submissions stored
-- [ ] Rate limiting returns 429
-- [ ] Spam control works
-- [ ] Geo fallback works
-- [ ] All geo providers down still stores submission
-- [ ] Email failure does not block submission
-- [ ] README and required files present
+- [x] Rate limiting returns 429
+- [x] Spam control works
+- [x] Geo fallback works
+- [x] All geo providers down still stores submission
+- [x] Email failure does not block submission
+- [x] README and required files present
 
 
 
@@ -369,4 +369,40 @@ access-control-allow-origin: http://localhost:5500
 
 The widget was rendered correctly onto the mock webpage, using just one script line in the html.
 ![Widget render](/screenshots/widget_embedded.png)
+
+
+## Stage 6 — Dashboard API and Probe 1 proof
+
+### Proof command
+
+```bash
+python scripts/probe_final.py   
+```
+
+Output:
+```text
+=== Health ===
+Status: 200
+{'status': 'ok'}
+
+=== Valid cross-origin submission ===
+Status: 201
+{'id': 24, 'widget_public_id': 'widget-a-123', 'ip_address': '127.0.0.1', 'geo_country': 'US', 'geo_city': 'New York', 'geo_provider': 'A', 'idempotency_key': None, 'created_at': '2026-10-06 21:04:58', 'data': {'email': 'final-549d89@example.com'}}
+
+=== Owner A dashboard submissions ===
+Status: 200
+[{'id': 24, 'widget_public_id': 'widget-a-123', 'ip_address': '127.0.0.1', 'geo_country': 'US', 'geo_city': 'New York', 'geo_provider': 'A', 'idempotency_key': None, 'created_at': '2026-10-06 21:04:58', 'data': {'email': 'final-549d89@example.com'}}, {'id': 23, 'widget_public_id': 'widget-a-123', 'ip_address': '127.0.0.1', 'geo_country': 'US', 'geo_city': 'New York', 'geo_provider': 'A', 'idempotency_key': None, 'created_at': '2026-10-06 20:09:04', 'data': {'email': 'background-fail@example.com'}}, {'id': 22, 'widget_public_id': 'widget-a-123', 'ip_address': '127.0.0.1', 'geo_country': 'US', 'geo_city': 'New York', 'geo_provider': 'A', 'idempotency_key': None, 'created_at': '2026-10-06 20:08:10', 'data': {'email': 'background-fail@example.com'}}, {'id': 21, 'widget_public_id': 'widget-a-123', 'ip_address': '127.0.0.1', 'geo_country': 'US', 'geo_city': 'New York', 'geo_provider': 'A', 'idempotency_key': None, 'created_at': '2026-10-06 20:04:05', 'data': {'email': 'shadcn@example.com'}}, {'id': 20, 'widget_public_id': 'widget-a-123', 'ip_address': '127.0.0.1', 'geo_country': 'US', 'geo_city': 'New York', 'geo_provider': 'A', 'idempotency_key': None, 'created_at': '2026-10-06 18:05:40', 'data': {'email': 'stage5-6ad2aa@example.com'}}]
+
+=== Owner A dashboard stats ===
+Status: 200
+{'total_submissions': 24, 'window_days': 7, 'per_widget': [{'widget_public_id': 'widget-a-123', 'submission_count': 24}], 'per_day': [{'day': '2026-10-05', 'submission_count': 2}, {'day': '2026-10-06', 'submission_count': 22}], 'geo_breakdown': [{'country': 'US', 'submission_count': 19}, {'country': 'unknown', 'submission_count': 4}, {'country': 'UK', 'submission_count': 1}]}
+
+=== Owner B dashboard submissions ===
+Status: 200
+[]
+
+=== Owner B tries to filter by Owner A widget ===
+Status: 200
+[]
+```
 

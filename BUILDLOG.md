@@ -110,3 +110,25 @@
 - Widget delivery and submission handling do not call paid AI services.
 - No runtime AI cost tracking is required for these endpoints.
 
+## Stage 6 — Dashboard, documentation, and final proof
+
+### Where AI helped
+
+- AI helped design the dashboard aggregation queries for per-widget counts, per-day counts, and geo breakdown.
+- AI helped structure the final README and capstone manifest so a reviewer can run the project quickly.
+- AI helped create the final probe script to prove that a valid submission becomes visible through the dashboard API.
+
+### What I checked
+
+- I verified that a valid submission returns 201 and appears in the owner dashboard.
+- I verified that Owner B cannot see Owner A's submissions.
+- I verified that dashboard stats are tenant-isolated.
+- I verified the README setup steps match the actual project structure.
+- I verified capstone.yaml contains the run, seed, test, base URL, and endpoint list.
+
+### Final AI ownership note
+
+- AI was used as a development assistant for planning, debugging, and code generation.
+- I reviewed the code and tested the behavior manually.
+- The running application does not call paid AI services, so no runtime AI cost tracking is required.
+
