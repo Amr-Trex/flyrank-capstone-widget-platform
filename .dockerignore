@@ -1,0 +1,22 @@
+# Git
+.git
+.gitignore
+
+# Python
+.venv
+venv
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+
+# Local secrets
+.env
+
+# Local databases
+*.sqlite3
+*.db
+
+# Misc
+node_modules
+.DS_Store

@@ -65,22 +65,23 @@
 - No AI calls are made during public submission handling.
 - Therefore no per-request AI cost tracking is needed for this stage.
 
-
 ## Stage 4 — Abuse Protection & Resilience
 
 ### Where AI helped
+
 - AI helped design the in-memory rate limiting dictionary and time-window cleanup logic.
 - AI helped structure the exact order of operations in the public router (Size -> JSON -> Honeypot -> Rate Limit -> Validate -> Enrich -> Store -> Side Effect).
 
 ### What I checked
+
 - I verified that filling the honeypot field returns 200 but does not insert a row into SQLite.
 - I verified that sending 6 requests in 1 minute triggers a 429 on the 6th request.
 - I used `.env` toggles to deterministically prove the geo fallback chain (A -> B -> None) without relying on flaky external APIs.
 - I proved that forcing the email function to throw an exception does not change the 201 HTTP response or prevent the database insert.
 
 ### Cost tracking
-- All enrichment and side-effects are mocked locally. No external API calls or AI tokens are consumed during these requests.
 
+- All enrichment and side-effects are mocked locally. No external API calls or AI tokens are consumed during these requests.
 
 ## Stage 5 — Widget delivery and second-origin proof
 
@@ -140,3 +141,9 @@
 - I verified that when SMTP is down, the submission still returns success and is stored.
 - SMTP credentials, if used, remain only in `.env`, which is git-ignored.
 
+## Containerization
+
+- Used docker to containerize the project, now there is no need to run multiple things manually, if you have docker it would be easier.
+- Verified that the docker stack works as intended.
+- Verified that all features remain intact after using docker.
+- Enhanced README file with the help of AI and explained a bit more in depth about the functionality of the project and use of docker.
