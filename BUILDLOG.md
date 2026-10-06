@@ -66,3 +66,17 @@
 - Therefore no per-request AI cost tracking is needed for this stage.
 
 
+## Stage 4 — Abuse Protection & Resilience
+
+### Where AI helped
+- AI helped design the in-memory rate limiting dictionary and time-window cleanup logic.
+- AI helped structure the exact order of operations in the public router (Size -> JSON -> Honeypot -> Rate Limit -> Validate -> Enrich -> Store -> Side Effect).
+
+### What I checked
+- I verified that filling the honeypot field returns 200 but does not insert a row into SQLite.
+- I verified that sending 6 requests in 1 minute triggers a 429 on the 6th request.
+- I used `.env` toggles to deterministically prove the geo fallback chain (A -> B -> None) without relying on flaky external APIs.
+- I proved that forcing the email function to throw an exception does not change the 201 HTTP response or prevent the database insert.
+
+### Cost tracking
+- All enrichment and side-effects are mocked locally. No external API calls or AI tokens are consumed during these requests.

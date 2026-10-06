@@ -4,15 +4,15 @@ This file contains proof for each requirement.
 
 ## Requirements checklist
 
-- [ ] Authenticated widget CRUD
-- [ ] Tenant isolation
-- [ ] Embed snippet generated
-- [ ] Public config endpoint with cache headers
-- [ ] Versioned widget script
-- [ ] Widget renders on second origin
-- [ ] Cross-origin submissions work
-- [ ] Invalid payloads rejected with 4xx
-- [ ] Valid submissions stored
+- [x] Authenticated widget CRUD
+- [x] Tenant isolation
+- [x] Embed snippet generated
+- [x] Public config endpoint with cache headers
+- [x] Versioned widget script
+- [x] Widget renders on second origin
+- [x] Cross-origin submissions work
+- [x] Invalid payloads rejected with 4xx
+- [x] Valid submissions stored
 - [ ] Rate limiting returns 429
 - [ ] Spam control works
 - [ ] Geo fallback works
@@ -181,4 +181,113 @@ Output:
 (3, 'widget-a-123', '{"email": "stage3@example.com"}', '127.0.0.1', '2026-10-06 03:09:12')
 (2, 'widget-a-123', '{"email": "idempotent@example.com"}', '127.0.0.1', '2026-10-05 18:13:48')        
 (1, 'widget-a-123', '{"email": "stage3@example.com"}', '127.0.0.1', '2026-10-05 18:13:36')
+```
+
+## Stage 4 — Abuse Protection, Geo Fallback, and Safe Side Effects
+
+### 1. Honeypot Spam Protection
+Bot fills hidden 'website' field. Returns 200 to trick bot, but nothing is saved to DB.
+```javascript
+import httpx
+
+response = httpx.post(
+    "http://localhost:8000/public/submissions",
+    json={
+        "widget_public_id": "widget-a-123",
+        "data": {"email": "bot@spam.com", "website": "http://buy-pills.com"}
+    },
+    timeout=5
+)
+```
+
+Backend console output:
+```text
+[SPAM] Honeypot triggered. Silently dropping submission.
+INFO:     127.0.0.1:64493 - "POST /public/submissions HTTP/1.1" 200 OK
+```
+
+### 2. Rate Limiting (30s window)
+After 5 requests, next one returns 429.
+
+```python
+for i in range(7):
+    response = httpx.post(
+        "http://localhost:8000/public/submissions",
+        json={
+            "widget_public_id": "widget-a-123",
+            "data": {"email": f"user{i}@test.com"}
+        },
+        timeout=5
+    )
+    print(f"Request {i+1} status:", response.status_code)
+```
+
+Backend console output:
+```text
+[EMAIL] Sent confirmation for widget 'Newsletter Signup' to {'email': 'user0@test.com'}
+INFO:     127.0.0.1:64496 - "POST /public/submissions HTTP/1.1" 201 Created
+[GEO] Provider A succeeded for 127.0.0.1
+[EMAIL] Sent confirmation for widget 'Newsletter Signup' to {'email': 'user1@test.com'}
+INFO:     127.0.0.1:64498 - "POST /public/submissions HTTP/1.1" 201 Created
+[GEO] Provider A succeeded for 127.0.0.1
+[EMAIL] Sent confirmation for widget 'Newsletter Signup' to {'email': 'user2@test.com'}
+INFO:     127.0.0.1:56733 - "POST /public/submissions HTTP/1.1" 201 Created
+[GEO] Provider A succeeded for 127.0.0.1
+[EMAIL] Sent confirmation for widget 'Newsletter Signup' to {'email': 'user3@test.com'}
+INFO:     127.0.0.1:56735 - "POST /public/submissions HTTP/1.1" 201 Created
+[GEO] Provider A succeeded for 127.0.0.1
+[EMAIL] Sent confirmation for widget 'Newsletter Signup' to {'email': 'user4@test.com'}
+INFO:     127.0.0.1:56737 - "POST /public/submissions HTTP/1.1" 201 Created
+INFO:     127.0.0.1:56739 - "POST /public/submissions HTTP/1.1" 429 Too Many Requests
+```
+
+### 3. Geo Fallbacks
+
+**Normal operation (Provider A succeeds):**
+```bash
+# default .env (GEO_MODE=mock)
+```
+Backend console output:
+```text
+[GEO] Provider A succeeded for 127.0.0.1
+[EMAIL] Sent confirmation for widget 'Newsletter Signup' to {'email': 'geo1@test.com'}
+INFO:     127.0.0.1:56740 - "POST /public/submissions HTTP/1.1" 201 Created
+```
+
+**Provider A down (Fallback to Provider B):**
+```bash
+# Set GEO_MODE=mock_a_down in .env and restart server
+```
+Backend console output:
+```text
+[GEO] Provider A failed: Provider A is down. Trying Provider B...
+[GEO] Provider B succeeded for 127.0.0.1
+[EMAIL] Sent confirmation for widget 'Newsletter Signup' to {'email': 'geo2@test.com'}
+INFO:     127.0.0.1:56741 - "POST /public/submissions HTTP/1.1" 201 Created
+```
+
+**Both Providers down (Graceful degradation):**
+```bash
+# Set GEO_MODE=mock_both_down in .env and restart server
+```
+Backend console output:
+```text
+[GEO] Provider A failed: Provider A is down. Trying Provider B...
+[GEO] Provider B failed: Provider B is down. Degrading gracefully.
+[EMAIL] Sent confirmation for widget 'Newsletter Signup' to {'email': 'geo3@test.com'}
+INFO:     127.0.0.1:56742 - "POST /public/submissions HTTP/1.1" 201 Created
+```
+
+### 4. Safe Side Effects (Email Failure)
+
+If the email server goes offline, the submission is still stored and the frontend still receives a 201 success response.
+
+```bash
+# Set EMAIL_MODE=fail in .env and restart server
+```
+Backend console output:
+```text
+[GEO] Provider A succeeded for 127.0.0.1
+[EMAIL] Side effect failed, but we do NOT block the submission: SMTP Server is completely offline!
+INFO:     127.0.0.1:56743 - "POST /public/submissions HTTP/1.1" 201 Created
 ```
