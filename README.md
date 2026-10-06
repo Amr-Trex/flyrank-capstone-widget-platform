@@ -332,6 +332,21 @@ With `EMAIL_MODE=fail`, the submission still succeeds, is stored, and the server
 
 ---
 
+## Real SMTP mode
+
+The platform supports real SMTP email delivery.
+
+Set:
+
+```env
+EMAIL_MODE=smtp
+SMTP_HOST=localhost
+SMTP_PORT=1025
+SMTP_SECURITY=none
+```
+
+---
+
 ## Probe Scripts
 
 Run the API first:

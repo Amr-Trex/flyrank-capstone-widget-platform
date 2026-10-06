@@ -19,8 +19,21 @@ class Settings:
 
         self.max_submission_bytes = int(os.getenv("MAX_SUBMISSION_BYTES", "10000"))
         self.rate_limit_per_minute = int(os.getenv("RATE_LIMIT_PER_MINUTE", "5"))
+
         self.geo_mode = os.getenv("GEO_MODE", "mock")
         self.email_mode = os.getenv("EMAIL_MODE", "console")
+
+        self.smtp_host = os.getenv("SMTP_HOST", "localhost")
+        self.smtp_port = int(os.getenv("SMTP_PORT", "1025"))
+        self.smtp_username = os.getenv("SMTP_USERNAME", "")
+        self.smtp_password = os.getenv("SMTP_PASSWORD", "")
+        self.smtp_security = os.getenv("SMTP_SECURITY", "none").lower()
+
+        self.email_from = os.getenv("EMAIL_FROM", "widget-platform@example.local")
+        self.notification_email = os.getenv("NOTIFICATION_EMAIL", "owner@example.com")
+
+        if self.smtp_security not in {"none", "starttls", "ssl"}:
+            self.smtp_security = "none"
 
 
 @lru_cache

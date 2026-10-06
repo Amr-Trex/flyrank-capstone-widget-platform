@@ -132,3 +132,11 @@
 - I reviewed the code and tested the behavior manually.
 - The running application does not call paid AI services, so no runtime AI cost tracking is required.
 
+## Real SMTP extension
+
+- Added real SMTP client functionality using Python's smtplib.
+- I tested SMTP locally using aiosmtpd.
+- I verified that when SMTP is running, emails are sent.
+- I verified that when SMTP is down, the submission still returns success and is stored.
+- SMTP credentials, if used, remain only in `.env`, which is git-ignored.
+
