@@ -1,7 +1,7 @@
 import json
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, ValidationError
 
@@ -20,7 +20,7 @@ class SubmissionPayload(BaseModel):
     idempotency_key: Optional[str] = Field(default=None, max_length=100)
 
 @router.post("/submissions", status_code=201)
-async def create_submission(request: Request):
+async def create_submission(request: Request, background_tasks: BackgroundTasks):
     # 1. Check raw body size
     body = await request.body()
     if len(body) > settings.max_submission_bytes:
@@ -83,6 +83,6 @@ async def create_submission(request: Request):
         return JSONResponse(status_code=200, content=submission)
 
     # 11. Safe Side Effect (Email) - Runs AFTER storage, failure is ignored
-    send_confirmation_email(widget, cleaned_data)
+    background_tasks.add_task(send_confirmation_email, widget, cleaned_data)
 
     return submission

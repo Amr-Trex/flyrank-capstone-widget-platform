@@ -80,3 +80,33 @@
 
 ### Cost tracking
 - All enrichment and side-effects are mocked locally. No external API calls or AI tokens are consumed during these requests.
+
+
+## Stage 5 — Widget delivery and second-origin proof
+
+### Where AI helped
+
+- AI helped structure the embedded widget JavaScript loader and code for injecting the frontend of the widget.
+- AI helped choose cache headers: long-lived immutable cache for the versioned JS bundle, short-lived cache for widget config.
+- AI helped build the CORS probe script to prove preflight and cross-origin submission behavior.
+
+### What I checked
+
+- I verified the embed snippet is generated per widget and points to a versioned JS URL.
+- I verified `/public/widgets/{public_id}/config` returns a small JSON payload with `Cache-Control: public, max-age=60`.
+- I verified `/public/widget.v1.js` returns JavaScript with long-lived cache headers.
+- I verified the widget renders on `http://localhost:5500`, while the API runs on `http://localhost:8000`.
+- I verified the browser sends an OPTIONS preflight and then a successful POST submission.
+- I verified the email side effect now runs as a background task, retries, logs an alert on failure, and does not block the submission.
+
+### What I changed
+
+- I changed CORS from wildcard to explicit second-origin values for clearer proof.
+- I moved the email side effect from a direct call into a background task.
+- I added retries and an alert message to the email job so the shared background-job requirement is satisfied.
+
+### Cost tracking
+
+- Widget delivery and submission handling do not call paid AI services.
+- No runtime AI cost tracking is required for these endpoints.
+

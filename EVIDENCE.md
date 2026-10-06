@@ -291,3 +291,82 @@ Backend console output:
 [EMAIL] Side effect failed, but we do NOT block the submission: SMTP Server is completely offline!
 INFO:     127.0.0.1:56743 - "POST /public/submissions HTTP/1.1" 201 Created
 ```
+
+## Stage 5 — Widget delivery, CORS, and second-origin proof
+
+### 1. Embed snippet generated per widget
+
+Command:
+
+```bash
+python scripts/probe_stage5.py
+```
+
+Output:
+```text
+=== Embed snippet for Owner A widget ===
+Status: 200
+{'public_id': 'widget-a-123', 'embed_snippet': '<script src="http://localhost:8000/public/widget.v1.js?id=widget-a-123"></script>'}
+```
+
+### 2. Public config with cache header
+
+```text
+=== Public config with cache header ===
+Status: 200
+cache-control: public, max-age=60
+access-control-allow-origin: http://localhost:5500
+{'widget_public_id': 'widget-a-123', 'title': 'Newsletter Signup', 'description': 'Get product updates', 'button_text': 'Subscribe', 'fields': [{'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}], 'submit_url': 'http://localhost:8000/public/submissions', 'honeypot_field': 'website'}
+```
+
+
+### 3. Versioned widget JS
+
+```text
+=== Versioned widget JS ===
+Status: 200
+cache-control: public, max-age=31536000, immutable
+content-type: application/javascript
+access-control-allow-origin: http://localhost:5500
+(function () {
+  function log() {
+    if (window.console && console.log) {
+      console.log.apply(console, arguments);
+    }
+  }
+
+  var script = document.currentScript;
+
+  if (!script) {
+    log("[widget] Could not find currentScript");
+    return;
+  }
+
+  var scriptUrl = new URL(scrip
+```
+
+
+### 4. CORS preflight for submission
+
+```text
+=== CORS preflight for submission ===
+access-control-allow-methods: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT, QUERY
+access-control-allow-headers: content-type
+OK
+```
+
+### 5. Cross-origin valid submission
+
+```text
+=== Cross-origin valid submission ===
+Status: 201
+access-control-allow-origin: http://localhost:5500
+{'id': 20, 'widget_public_id': 'widget-a-123', 'ip_address': '127.0.0.1', 'geo_country': 'US', 'geo_city': 'New York', 'geo_provider': 'A', 'idempotency_key': None, 'created_at': '2026-10-06 18:05:40', 'data': {'email': 'stage5-6ad2aa@example.com'}}
+
+```
+
+### 6. Widget render
+
+The widget was rendered correctly onto the mock webpage, using just one script line in the html.
+![Widget render](/screenshots/widget_embedded.png)
+
