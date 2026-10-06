@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from app import repositories as repo
+from app.repositories import widgets as repo
 from app.auth import get_current_owner
 from app.config import get_settings
 

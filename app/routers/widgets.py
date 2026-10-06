@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app import repositories as repo
+from app.repositories import widgets as repo
 from app.auth import get_current_owner
-from app.schemas import WidgetCreate, WidgetOut, WidgetUpdate
+from app.schemas.widgets import WidgetCreate, WidgetOut, WidgetUpdate
 
 router = APIRouter(prefix="/widgets", tags=["widgets"])
 

@@ -5,11 +5,11 @@ from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, ValidationError
 
-from app import submissions_repository as sub_repo
-from app.abuse import check_honeypot, check_rate_limit
+from app.repositories import submissions as sub_repo
+from app.services.abuse import check_honeypot, check_rate_limit
 from app.config import get_settings
-from app.enrichment import enrich_geo, send_confirmation_email
-from app.services import clean_and_validate_submission_data
+from app.services.enrichment import enrich_geo, send_confirmation_email
+from app.services.validation import clean_and_validate_submission_data
 
 router = APIRouter(prefix="/public", tags=["public"])
 settings = get_settings()

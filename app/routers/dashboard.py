@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Query
 
-from app import dashboard_repository as dash_repo
+from app.repositories import dashboard as dash_repo
 from app.auth import get_current_owner
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])

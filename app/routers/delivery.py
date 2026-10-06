@@ -10,7 +10,7 @@ from pathlib import Path
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 
-from app import submissions_repository as sub_repo
+from app.repositories import submissions as sub_repo
 from app.config import get_settings
 
 router = APIRouter(prefix="/public", tags=["public"])
